@@ -1,0 +1,71 @@
+.login, .register{
+    display: inline-block;
+    
+
+}
+
+h2{
+    font-size: calc(10px + 6vmin);
+}
+
+label{
+    font-size: calc(10px + 2vmin);
+}
+
+
+.center{
+    text-align: center;
+}
+
+input[type=text], input[type=password] {
+    text-align: center;
+    font-weight: bold;
+    font-size: calc(10px + 1vmin);
+    width: 100%;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    font-size: calc(10px + 1vmin);
+    font-weight: bold;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.container{
+    display: inline-block;
+}
+
+.psw{
+    font-size: calc(2vmin);
+}
+.psw:hover{
+    font-size: calc(2.5vmin);
+}
+.reg{
+    font-size: calc(2.5vmin);
+}
+.regHref:hover{
+    font-size: calc(3vmin);
+}
+a{
+    color: greenyellow;
+}
+.errors{
+    color:red;
+    font-size: calc(2vmin);
+}
