@@ -1,21 +1,34 @@
-import React, { Component } from 'react';
-import {ImageComponent} from './ImageComponent'
+import React from 'react';
+import { ItemContainer } from '../components/ItemContainer';
 
 
 
 export class Character extends React.Component{
-    constructor(props){
-        super(props)
-    }
+
+
 
     render() {
         return (
             <div>
                 <h1>This is character</h1>
-                <ImageComponent url={weaopn0} drag={true}/>
+                <div id="character">
+                    <div>
+                        <ItemContainer prefix="item" img="DdaAgr.png" id="0" drag={true}></ItemContainer>
+                        <ItemContainer id="1"></ItemContainer>
+                        
+                    </div>
+
+
+
+                </div>
             </div>
         )
     }
+
+
+
+
+
 
     componentDidMount(){
         //TODO check if there is loaded character files to show if not load them if they are use them

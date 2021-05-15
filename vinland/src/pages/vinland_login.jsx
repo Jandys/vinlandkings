@@ -1,12 +1,9 @@
 import CryptoJS from 'crypto-js';
-import React, { Component } from 'react';
+import React from 'react';
 import cookie from 'react-cookies';
 
 
 export class Login extends React.Component{
-    constructor(props){
-        super(props)
-    }
 
     render() {
             return (
@@ -45,7 +42,7 @@ export class Login extends React.Component{
  
     
     componentDidMount(){
-        if(checkSession() == true){
+        if(checkSession() === true){
             toGame()
         }
         else{
@@ -58,43 +55,6 @@ export class Login extends React.Component{
 
 const datalog = {};
 
-
-const vinland_login = () => { 
-        return(                   
-                    <div className="Vinland" id="vLog">
-                        
-                        <h2>Vinland Kings</h2>
-    
-                        <div class="login">
-    
-    
-                            <form>
-                            <label><b>Username</b></label>
-                            <input class="uname" type="text" placeholder="Enter Username" required id="nam"></input>
-                            <br/>    
-    
-                            <label><b>Password</b></label>
-                            
-                            <input class="pass" type="password" placeholder="Enter Password" required id="pwd"></input>
-                            <br/>
-                            <button type="button" onClick={submitHandle} >Login</button>
-
-                            </form>
-                        </div>
-                        <div class="container">
-                            <span class="errors" id="errorM"></span>
-                        </div>    
-                        <div class="container">
-                        <span class="psw">Forgot a <a href="/forgotPassword" class="pswHref">password?</a></span>
-                        </div>
-                        <div class="container">
-                        <span class="reg">Or <a href="/register" class="regHref">register</a> and try Vinland Kings for free.</span>
-                        </div>
-                        
-
-                </div>
-            );
-}
     
 function submitHandle(e) {
     var pwdObj = document.getElementById('pwd').value;
@@ -117,7 +77,7 @@ function submitHandle(e) {
             toGame()
            }
            else{
-               if(data["error"] == "1057")
+               if(data["error"] === "1057")
                {
                 const nam = document.getElementById('nam')
                 const pas = document.getElementById('pwd')
@@ -126,6 +86,7 @@ function submitHandle(e) {
                 const erM = document.getElementById('errorM')
                 erM.innerText = data["message"]
                 erM.style = ""
+                //TODO add function that fades error borders after error after some time
                 }  
            }
        }).catch(function (ex){
@@ -177,14 +138,14 @@ function toGame() {
 async function checkSession(){
     const session = cookie.load('VINLANDSESSION')
     const vinusr = cookie.load('VINLANDUSER')
-    if(session == undefined || vinusr == undefined){
+    if(session === undefined || vinusr === undefined){
         return false;
     }
     else{
         let url = `http://localhost:8080/session?id=${session}&name=${vinusr}`
         await doFetch(url).then((data) => {
             console.log(data)
-            if(data["status" == "ok"]){
+            if(data["status" === "ok"]){
                 return true;
             }
         }).catch(function (ex){
