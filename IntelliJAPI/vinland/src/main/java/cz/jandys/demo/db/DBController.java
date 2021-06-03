@@ -1,13 +1,17 @@
 package cz.jandys.demo.db;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.Random;
+import java.util.UUID;
 
 public class DBController {
 
     private Architype type = Architype.MYSQL;
-    private String database= "test";
+    private String database = "test";
     private String user = "root";
     private String pass = "root";
     private Connection conn;
@@ -22,6 +26,7 @@ public class DBController {
         this.user = user;
         this.pass = pass;
     }
+
     public DBController(String database, String user, String pass) {
         this.database = database;
         this.user = user;
@@ -30,17 +35,17 @@ public class DBController {
 
     //CONNECT
     private void connect() throws Exception {
-            switch (type) {
-                case MYSQL:
-                    this.conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + this.database, this.user, this.pass);
-                    break;
-                default:
-                    throw new Exception("Architype is not chosen");
-            }
+        switch (type) {
+            case MYSQL:
+                this.conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + this.database, this.user, this.pass);
+                break;
+            default:
+                throw new Exception("Architype is not chosen");
+        }
     }
 
     //DISCONNECT
-    private void disconnect(){
+    private void disconnect() {
         try {
             this.conn.close();
         } catch (SQLException throwables) {
@@ -51,38 +56,38 @@ public class DBController {
     /**
      * Attemt on login returns true if name and pass are correct
      */
-    public boolean loginAttempt(String name, String pass){
+
+    public boolean loginAttempt(String name, String pass) {
         try {
             connect();
             String sql = "select * from users where BINARY name = ?  and BINARY pass = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,name);
-            stmt.setString(2,pass);
+            stmt.setString(1, name);
+            stmt.setString(2, pass);
             ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()){
+            while (rs.next()) {
                 return true;
             }
             stmt.close();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             disconnect();
         }
         return false;
     }
 
     //Attempts to register return true if register went alright
-    public boolean registerAttempt(String name, String pass, String email){
+    public boolean registerAttempt(String name, String pass, String email) {
         try {
             connect();
-            if(accountDoesNotExist(name)){
+            if (accountDoesNotExist(name)) {
                 String sql = "insert into users (name, pass, email) values(?,?,?)";
                 PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setString(1,name);
-                stmt.setString(2,pass);
-                stmt.setString(3,email);
+                stmt.setString(1, name);
+                stmt.setString(2, pass);
+                stmt.setString(3, email);
                 stmt.executeUpdate();
                 stmt.close();
                 createCharacter(getUserIDbyName(name));
@@ -90,20 +95,19 @@ public class DBController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             disconnect();
         }
         return false;
     }
 
     private void createCharacter(int userID) {
-        try{
+        try {
             String sql = "insert into chatacters (userid) values(?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1,userID);
+            stmt.setInt(1, userID);
             stmt.executeUpdate();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -113,9 +117,9 @@ public class DBController {
         try {
             String sql = "select * from users where BINARY name = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,name);
+            stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 stmt.close();
                 return false;
             }
@@ -127,79 +131,69 @@ public class DBController {
     }
 
     //Creates session
-    public String createSession(String name){
-        try{
+    public String createSession(String name) {
+        try {
             connect();
             int id = getUserIDbyName(name);
             deleteSessionsByID(id);
             String session;
-            do{
+            do {
                 session = generateSession();
-            }while (checkIfSessionExists(session));
+            } while (checkIfSessionExists(session));
             String sql = "insert into sessions (sessionid, userid) values(?,?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,session);
-            stmt.setInt(2,id);
+            stmt.setString(1, session);
+            stmt.setInt(2, id);
             stmt.executeUpdate();
             stmt.close();
             return session;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             disconnect();
         }
         return null;
     }
 
-    private String generateSession() {
-        String session = "";
-        rnd = new Random(System.currentTimeMillis());
-        for(int i = 0; i<5;i++){
-            for (int j = 0; j < 5; j++) {
-                session += characters[rnd.nextInt(characters.length)];
-            }
-            session += "-";
-        }
-        return session.substring(0,session.length()-1);
+    public String generateSession() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
-    private boolean checkIfSessionExists(String session){
-        try{
+    private boolean checkIfSessionExists(String session) {
+        try {
             String sql = "select * from sessions where sessionid like ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,session);
+            stmt.setString(1, session);
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()){
-                stmt.close();
-                return true;
-            }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    //Returns true if sesion with name an sessionid exists
-    public boolean checkSession(String name, String sessionid){
-        try {
-            connect();
-            String sql = "select * from sessions where sessionid like ? and userid like ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,sessionid);
-            int id = getUserIDbyName(name);
-            if (id == -1) return false;
-            stmt.setInt(2,id);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 stmt.close();
                 return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
+        return false;
+    }
+
+    //Returns true if sesion with name an sessionid exists
+    public boolean checkSession(String name, String sessionid) {
+        try {
+            connect();
+            String sql = "select * from sessions where sessionid like ? and userid like ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, sessionid);
+            int id = getUserIDbyName(name);
+            if (id == -1) return false;
+            stmt.setInt(2, id);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                stmt.close();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             disconnect();
         }
         return false;
@@ -210,10 +204,10 @@ public class DBController {
         try {
             String sql = "select id from users where name like ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,name);
+            stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()){
+            while (rs.next()) {
                 return rs.getInt(1);
             }
         } catch (Exception e) {
@@ -230,24 +224,50 @@ public class DBController {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(sql);
             stmt.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             disconnect();
         }
     }
 
-    private void deleteSessionsByID(int id){
-        try{
+    private void deleteSessionsByID(int id) {
+        try {
             String sql = "delete from sessions where userid = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1,id);
+            stmt.setInt(1, id);
             stmt.executeUpdate();
             stmt.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+
+
+    public int getUsersIDbyNameAndPass(String name, String pass) {
+
+        System.out.println(pass);
+        System.out.println(hashPassword(pass,"ělfaKkwdk"));
+
+        return 1;
+    }
+
+    private String hashPassword(String pass, String salt) {
+        String generatedPassword = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(salt.getBytes(StandardCharsets.UTF_8));
+            byte[] bytes = md.digest(pass.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bytes.length; i++) {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            generatedPassword = sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return generatedPassword;
+    }
+
 }

@@ -4,17 +4,30 @@ import cz.jandys.demo.db.Architype;
 import cz.jandys.demo.db.DBController;
 import cz.jandys.demo.json.JSONProducer;
 import org.json.simple.JSONArray;
-import org.springframework.scheduling.annotation.Async;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Base64;
 import java.util.Random;
 
 @RestController
-public class HelloController {
+public class MainController {
 
     private long timechecker = System.currentTimeMillis();
     private DBController vinlandDBControler = null;
+    char[] chars = {'a','b'};
+
+    @CrossOrigin(origins = {"http://localhost", "http://10.0.0.1"})
+    @RequestMapping(value = "/login2", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    public String Login2(@RequestBody String body){
+        JSONProducer input = new JSONProducer().fromBody(body);
+        System.out.println(input.toString());
+        return "3";
+    }
+
 
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -33,7 +46,10 @@ public class HelloController {
         output.add("error","1057");
         output.add("message","The account name is invalid or does not exist or the password is invalid for the account name specified.");
         output.add("name",name);
+        for (int i = 0; i < 6; i++) {
+            char g =chars[new Random().nextInt(chars.length)];
 
+        }
         return output.toString();
     }
 
@@ -48,11 +64,11 @@ public class HelloController {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = "application/json")
-    public String Register(@RequestParam(value = "name") String name, @RequestParam(value = "pass") String pass, @RequestParam(value="email") String email){
-        checkTiming();
+    public String Register(@RequestBody String body){
+        //checkTiming();
         JSONProducer output = new JSONProducer();
-        DBController dbController = getDBControler();
-        if(dbController.registerAttempt(name,pass,email)){
+        //DBController dbController = getDBControler();
+        /*if(dbController.registerAttempt(name,pass,email)){
             output.add("status","ok");
             output.add("message","register succesful");
             output.add("name",name);
@@ -60,10 +76,10 @@ public class HelloController {
             output.add("sesioncheck", String.valueOf(new Random(System.currentTimeMillis()).nextInt(Integer.MAX_VALUE)));
 
             return output.toString();
-        }
+        }*/
         output.add("status","error");
         output.add("message","register failed");
-        output.add("name",name);
+        output.add("name",body);
 
         return output.toString();
     }

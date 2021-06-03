@@ -2,9 +2,12 @@ package cz.jandys.demo.json;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class JSONProducer {
     JSONObject jsonObject = new JSONObject();
+
 
     public void add(String key, String value){
         jsonObject.put(key,value);
@@ -25,5 +28,18 @@ public class JSONProducer {
 
     public JSONObject getObject() {
         return this.jsonObject;
+    }
+
+    public String getValue(String key){
+        return jsonObject.get(key).toString();
+    }
+
+    public JSONProducer fromBody(String s){
+        try {
+            this.jsonObject = (JSONObject) new JSONParser().parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return this;
     }
 }
